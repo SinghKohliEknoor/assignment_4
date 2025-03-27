@@ -4,24 +4,24 @@ import { supabase } from '../lib/supabaseClient';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 
-// Define the type for the navigation stack parameters
 type AuthStackParamList = {
-    SignIn: undefined;
+    SignIn: { email: string; password: string; firstname: string; lastname: string } | undefined;
     SignUp: undefined;
     Landing: undefined;
 };
 
-// Define the navigation prop type for the SignUpScreen
 type SignUpScreenNavigationProp = StackNavigationProp<AuthStackParamList, 'SignUp'>;
 
 export default function SignUpScreen() {
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const navigation = useNavigation<SignUpScreenNavigationProp>();
 
     const handleSignUp = async () => {
-        if (!email || !password || !confirmPassword) {
+        if (!firstname || !lastname || !email || !password || !confirmPassword) {
             Alert.alert('Error', 'All fields are required');
             return;
         }
@@ -31,21 +31,9 @@ export default function SignUpScreen() {
             return;
         }
 
-        const lowerCaseEmail = email.toLowerCase(); // Convert email to lowercase for consistency
+        const lowerCaseEmail = email.toLowerCase(); 
 
-        // **STEP 1: Check if the email already exists**
-        const { data: existingUser, error: fetchError } = await supabase
-            .from('users')
-            .select('email')
-            .eq('email', lowerCaseEmail)
-            .single();
-
-        if (existingUser) {
-            Alert.alert('User Already Exists', 'Please sign in instead.');
-            return;
-        }
-
-        // **STEP 2: Proceed with sign-up**
+        // **Sign up using Supabase Auth but don't insert into 'users' table yet**
         const { data, error } = await supabase.auth.signUp({
             email: lowerCaseEmail,
             password,
@@ -56,16 +44,35 @@ export default function SignUpScreen() {
             return;
         }
 
-        Alert.alert('Success', 'Account created! Please check your email to verify your account.');
-        navigation.navigate('SignIn'); // Redirect to Sign In
+        Alert.alert('Success', 'Account created! Please sign in.');
+        
+        // Navigate to SignIn and pass user details
+        navigation.navigate('SignIn', { 
+            email: lowerCaseEmail, 
+            password, 
+            firstname, 
+            lastname 
+        });
     };
 
     return (
         <View style={styles.container}>
             <TextInput
+                placeholder="First Name"
+                value={firstname}
+                onChangeText={setFirstname}
+                style={styles.input}
+            />
+            <TextInput
+                placeholder="Last Name"
+                value={lastname}
+                onChangeText={setLastname}
+                style={styles.input}
+            />
+            <TextInput
                 placeholder="Email"
                 value={email}
-                onChangeText={(text) => setEmail(text.toLowerCase())} // Ensure input is always lowercase
+                onChangeText={(text) => setEmail(text.toLowerCase())}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={styles.input}

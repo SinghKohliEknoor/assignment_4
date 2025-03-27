@@ -9,7 +9,7 @@ type AuthStackParamList = {
     Landing: undefined;
 };
 
-type SignUpScreenNavigationProp = NavigationProp<AuthStackParamList, 'Landing'>;
+type LandingScreenNavigationProp = NavigationProp<AuthStackParamList, 'Landing'>;
 
 
 export default function LandingScreen() {
@@ -17,7 +17,7 @@ export default function LandingScreen() {
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [loading, setLoading] = useState(true);
-    const navigation = useNavigation<SignUpScreenNavigationProp>();
+    const navigation = useNavigation<LandingScreenNavigationProp>();
     const [isEditing, setIsEditing] = useState(false); // Track editing mode
 
     useEffect(() => {
